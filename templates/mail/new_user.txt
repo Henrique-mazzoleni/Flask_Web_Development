@@ -1,1 +1,0 @@
-A new user with the username {{ user.username }} has subscribed!!
