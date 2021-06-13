@@ -3,8 +3,10 @@ flask
 flask-bootstrap
 flask-moment
 flask-wtf
+wtforms-validators
 flask-sqlalchemy
 flask-migrate
 flask-mail
 flask-login
+itsdangerous
 email-validator
