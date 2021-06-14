@@ -33,3 +33,10 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Keep me logged in')
     submit = SubmitField('Log In')
 
+
+class ChangePassForm(FlaskForm):
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), EqualTo('confirm_pass', message='Passwords must match')])
+    confirm_pass = PasswordField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField('Change')
+
