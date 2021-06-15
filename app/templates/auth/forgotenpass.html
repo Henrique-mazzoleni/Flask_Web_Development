@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}Flasky - Forgoten Password{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Forgot Your Password?</h1>
+    <p>Not to worry! Just enter your registered email bellow and you will recieve an email to reset your password.</p>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

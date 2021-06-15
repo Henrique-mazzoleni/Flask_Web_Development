@@ -40,3 +40,11 @@ class ChangePassForm(FlaskForm):
     confirm_pass = PasswordField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField('Change')
 
+
+class ForgotenPassForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Reset')
+
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValueError('No user with given email.')

@@ -3,16 +3,16 @@ from flask_login import login_user, login_required, logout_user, current_user
 from . import auth
 from ..models import User
 from ..email import send_email
-from .froms import LoginForm, RegistrationForm, ChangePassForm
+from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm
 from .. import db
 
-@auth.before_request
+@auth.before_app_request
 def before_request():
     if current_user.is_authenticated \
             and not current_user.confirmed \
             and request.blueprint != 'auth' \
             and request.endpoint != 'static':
-        return redirect(url_for('auth.confirmed'))
+        return redirect(url_for('auth.unconfirmed'))
 
 @auth.route('/unconfirmed')
 def unconfirmed():  
@@ -91,3 +91,14 @@ def change_password():
             flash('The password provided is not valid')
         return redirect(url_for('main.index'))
     return render_template('/auth/changepass.html', form=form)
+
+@auth.route('/forgotenpass', methods=['GET', 'POST'])
+def forgoten_password():
+    form = ForgotenPassForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        token = user.generate_confirmation_token()
+        send_email(form.email.data, 'Password Reset', 'auth/email/forgotenpass', token=token, user=user)
+        flash('An email has been sent to your registered email account.  Just follow the link to reset your password.')
+        return redirect(url_for('main.index'))
+    return render_template('/auth/forgotenpass.html', form=form)
