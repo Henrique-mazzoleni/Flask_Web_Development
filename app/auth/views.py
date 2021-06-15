@@ -3,7 +3,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from . import auth
 from ..models import User
 from ..email import send_email
-from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm
+from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm, ResetPassForm
 from .. import db
 
 @auth.before_app_request
@@ -88,7 +88,7 @@ def change_password():
             db.session.commit()
             flash('You have successfully changed your password')
         else:
-            flash('The password provided is not valid')
+            flash('The current password provided is not valid')
         return redirect(url_for('main.index'))
     return render_template('/auth/changepass.html', form=form)
 
@@ -102,3 +102,18 @@ def forgoten_password():
         flash('An email has been sent to your registered email account.  Just follow the link to reset your password.')
         return redirect(url_for('main.index'))
     return render_template('/auth/forgotenpass.html', form=form)
+
+@auth.route('/resetpass/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    form = ResetPassForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user.confirm(token):
+            user.password = form.new_password.data
+            db.session.add(user)
+            db.session.commit()
+            flash('Your password was successfully reset.')
+        else:
+            flash('The token provided is broken or expired. Please get a new token.')
+        return redirect(url_for('auth.login'))
+    return render_template('/auth/resetpass.html', form=form)

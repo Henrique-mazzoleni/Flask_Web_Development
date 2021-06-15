@@ -38,7 +38,7 @@ class ChangePassForm(FlaskForm):
     old_password = PasswordField('Old Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired(), EqualTo('confirm_pass', message='Passwords must match')])
     confirm_pass = PasswordField('Confirm Password', validators=[DataRequired()])
-    submit = SubmitField('Change')
+    submit = SubmitField('Request')
 
 
 class ForgotenPassForm(FlaskForm):
@@ -47,4 +47,14 @@ class ForgotenPassForm(FlaskForm):
 
     def validate_email(self, field):
         if not User.query.filter_by(email=field.data).first():
-            raise ValueError('No user with given email.')
+            raise ValueError('There is no user registered with the given email.')
+
+class ResetPassForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), EqualTo('confirm_pass', message='Passwords do not match.')])
+    confirm_pass = PasswordField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField('Change')
+
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValueError('There is no user registered with the given email.')
