@@ -1,10 +1,14 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, current_app
 from flask_login import login_user, login_required, logout_user, current_user
+
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 from . import auth
 from ..models import User
 from ..email import send_email
-from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm, ResetPassForm
+from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm, ResetPassForm, ChangeEmailForm
 from .. import db
+
 
 @auth.before_app_request
 def before_request():
@@ -57,19 +61,43 @@ def logout():
     flash('You have been logged out')
     return redirect(url_for('main.index'))
 
-@auth.route('/confirm/<token>')
+@auth.route('/accountconfirm/<token>')
 @login_required
-def confirm(token):
+def account_confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.index'))
-    if current_user.confirm(token):
+    if current_user.check_token(token):
+        current_user.confirmed = True
+        db.session.add(current_user)
         db.session.commit()
         flash('You have successfully confirmed your email')
     else:
         flash('The confirmation link is invalid or expired')
     return redirect(url_for('main.index'))
 
-@auth.route('/confirm')
+@auth.route('/emailconfirm/<token>')
+@login_required
+def email_confirm(token):
+    if current_user.check_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token.encode('utf-8'))
+        except Exception:
+            flash('Token invalid or expired. Please regenerate Token.')
+            return redirect(url_for('main.index'))
+        if data.get('email'):
+            current_user.email = data.get('email')
+            db.session.add(current_user)
+            db.session.commit()
+            flash('New email confirmed and saved.')
+        else:
+            flash('There was something wrong with the token provided. Please generate a new token.')
+    else:
+        flash('The token was invalid or expired. Please generate a new token.')
+    return redirect(url_for('main.index'))
+
+
+@auth.route('/accountconfirm')
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
@@ -110,7 +138,7 @@ def reset_password(token):
     form = ResetPassForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user.confirm(token):
+        if user.check_token(token):
             user.password = form.new_password.data
             db.session.add(user)
             db.session.commit()
@@ -119,3 +147,16 @@ def reset_password(token):
             flash('The token provided is not valid or expired. Please get a new token.')
         return redirect(url_for('auth.login'))
     return render_template('/auth/resetpass.html', form=form)
+
+@auth.route('/changemail', methods=['GET', 'POST'])
+@login_required
+def change_email():
+    if not current_user.confirmed:
+        return redirect(url_for('auth.unconfirmed'))
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        token = current_user.generate_confirmation_token(email=form.new_email.data)
+        send_email(form.new_email.data, 'Confirm New Email', 'auth/email/confirmnewemail', token=token, user=current_user)
+        flash('An email has been sent to the new email adress. Please follow the link to confirm the new adress.')
+        return redirect(url_for('main.index'))
+    return render_template('/auth/changemail.html', form=form)

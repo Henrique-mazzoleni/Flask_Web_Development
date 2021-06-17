@@ -58,3 +58,11 @@ class ResetPassForm(FlaskForm):
     def validate_email(self, field):
         if not User.query.filter_by(email=field.data).first():
             raise ValueError('There is no user registered with the given email.')
+
+class ChangeEmailForm(FlaskForm):
+    new_email = StringField('New Email', validators=[DataRequired(), Length(1,64), Email()])
+    submit = SubmitField('Send Confirmation')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.email.data).first():
+            raise ValueError('There is already a user registered with this email adress.')
