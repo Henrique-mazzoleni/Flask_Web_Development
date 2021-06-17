@@ -80,6 +80,8 @@ def resend_confirmation():
 @auth.route('/changepass', methods=['GET', 'POST'])
 @login_required
 def change_password():
+    if not current_user.confirmed:
+        return redirect(url_for('auth.unconfirmed'))
     form = ChangePassForm()
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
@@ -114,6 +116,6 @@ def reset_password(token):
             db.session.commit()
             flash('Your password was successfully reset.')
         else:
-            flash('The token provided is broken or expired. Please get a new token.')
+            flash('The token provided is not valid or expired. Please get a new token.')
         return redirect(url_for('auth.login'))
     return render_template('/auth/resetpass.html', form=form)
