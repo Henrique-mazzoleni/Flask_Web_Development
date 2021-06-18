@@ -1,8 +1,20 @@
 import unittest
 from flask import current_app
+from app import create_app, db
 from app.models import User, Permission, AnonymousUser, Role
 
 class UserModelTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
     def test_password_setter(self):
         password = 'Cat'
         email='test@test.com'
@@ -20,7 +32,7 @@ class UserModelTestCase(unittest.TestCase):
         password = 'Cat'
         not_password = 'Dog'
         email='test@test.com'
-        test_user = User(emai=email, password=password)
+        test_user = User(email=email, password=password)
         self.assertTrue(test_user.verify_password(password))
         self.assertFalse(test_user.verify_password(not_password))
 
@@ -61,4 +73,5 @@ class UserModelTestCase(unittest.TestCase):
         self.assertTrue(u.can(Permission.WRITE))
         self.assertTrue(u.can(Permission.MODERATE))
         self.assertTrue(u.can(Permission.ADMIN))
+        
 
