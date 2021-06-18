@@ -103,6 +103,12 @@ class User(UserMixin, db.Model):
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
 
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
