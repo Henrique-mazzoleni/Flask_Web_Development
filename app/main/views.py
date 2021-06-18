@@ -30,6 +30,7 @@ def index():
         known=session.get('known', False),
         current_time=datetime.utcnow())
 
-@main.route('/user/<name>')
+@main.route('/user/<username>')
 def user(name):
-    return render_template('user.html', name=name)
+    user = User.query.filter_by(username=username).first_or_404()
+    return render_template('user.html', user=user)
