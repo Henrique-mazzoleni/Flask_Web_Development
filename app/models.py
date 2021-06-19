@@ -7,7 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import current_app, request
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-
+from markdown import markdown
+import bleach
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -45,18 +46,18 @@ class Role(db.Model):
             'User': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE
+                Permission.WRITE_ARTICLES
             ],
             'Moderator': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE,
+                Permission.WRITE_ARTICLES,
                 Permission.MODERATE
             ],
             'Administrator': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE,
+                Permission.WRITE_ARTICLES,
                 Permission.MODERATE,
                 Permission.ADMIN
             ],
@@ -77,7 +78,7 @@ class Role(db.Model):
 class Permission:
     FOLLOW = 1
     COMMENT = 2
-    WRITE = 4
+    WRITE_ARTICLES = 4
     MODERATE = 8
     ADMIN = 16
 
@@ -96,6 +97,7 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -165,6 +167,22 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_administrator(self):
         return False
+
+
+class Post(db.Model):
+    __tablename__ = 'Posts'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    body_html = db.Column(db.Text)
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+
+db.event.listen(Post.body, 'set', Post.on_changed_body)
 
 
 login_manager.anonymous_user = AnonymousUser
