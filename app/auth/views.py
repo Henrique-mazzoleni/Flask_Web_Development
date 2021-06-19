@@ -84,10 +84,11 @@ def email_confirm(token):
         try:
             data = s.loads(token.encode('utf-8'))
         except Exception:
-            flash('Token invalid or expired. Please regenerate Token.')
+            flash('Token invalid or expired. Please regenerate new Token.')
             return redirect(url_for('main.index'))
         if data.get('email'):
             current_user.email = data.get('email')
+            current_user.avatar_hash = current_user.gravatar_hash()
             db.session.add(current_user)
             db.session.commit()
             flash('New email confirmed and saved.')
