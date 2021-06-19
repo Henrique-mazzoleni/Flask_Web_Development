@@ -21,6 +21,9 @@ class Config:
     # General Database Manager Config
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Pagination config
+    FLASKY_POSTS_PER_PAGE = 10
+
     @staticmethod
     def init_app(app):
         pass
