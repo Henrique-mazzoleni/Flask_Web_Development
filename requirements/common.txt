@@ -10,3 +10,6 @@ flask-mail
 flask-login
 itsdangerous
 email-validator
+flask-pagedown
+markdown
+bleach
