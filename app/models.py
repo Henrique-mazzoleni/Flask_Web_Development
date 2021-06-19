@@ -45,18 +45,18 @@ class Role(db.Model):
             'User': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE
+                Permission.WRITE_ARTICLES
             ],
             'Moderator': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE,
+                Permission.WRITE_ARTICLES,
                 Permission.MODERATE
             ],
             'Administrator': [
                 Permission.FOLLOW,
                 Permission.COMMENT,
-                Permission.WRITE,
+                Permission.WRITE_ARTICLES,
                 Permission.MODERATE,
                 Permission.ADMIN
             ],
@@ -77,7 +77,7 @@ class Role(db.Model):
 class Permission:
     FOLLOW = 1
     COMMENT = 2
-    WRITE = 4
+    WRITE_ARTICLES = 4
     MODERATE = 8
     ADMIN = 16
 
