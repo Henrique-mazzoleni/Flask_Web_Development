@@ -9,6 +9,7 @@ class UserModelTestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        Role.insert_roles()
 
     def tearDown(self):
         db.session.remove()
@@ -45,7 +46,6 @@ class UserModelTestCase(unittest.TestCase):
         self.assertTrue(test_user.password_hash != other_test_user.password_hash)
 
     def test_user_role(self):
-        Role.insert_roles()
         email='john@example.com'
         password = 'cat'
         u = User(email=email, password=password)
@@ -64,7 +64,6 @@ class UserModelTestCase(unittest.TestCase):
         self.assertFalse(u.can(Permission.ADMIN))
 
     def test_admin_role(self):
-        Role.insert_roles()
         email = current_app.config['FLASKY_ADMIN']
         password = 'secretpassword'
         u = User(email=email, password=password)
@@ -74,4 +73,25 @@ class UserModelTestCase(unittest.TestCase):
         self.assertTrue(u.can(Permission.MODERATE))
         self.assertTrue(u.can(Permission.ADMIN))
         
+    def test_follow_following(self):
+        test_user = {
+            'email': 'test@test.com',
+            'password': 'pass',
+        }
+        test_user2 = {
+            'email': 'test2@test.com',
+            'password': 'pass',
+        }
+        u = User(**test_user)
+        u2 = User(**test_user2)
+        self.assertFalse(u.is_following(u2))
+        self.assertFalse(u2.is_followed_by(u))
+        u.follow(u2)
+        db.session.commit()
+        self.assertTrue(u.is_following(u2))
+        self.assertTrue(u2.is_followed_by(u))
+        u.unfollow(u2)
+        db.session.commit()
+        self.assertFalse(u.is_following(u2))
+        self.assertFalse(u2.is_followed_by(u))
 
