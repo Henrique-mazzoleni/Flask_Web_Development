@@ -2,7 +2,7 @@ from random import randint
 from sqlalchemy.exc import IntegrityError
 from faker import Faker
 from . import db
-from .models import User, Post
+from .models import User, Post, Comment
 
 def users(count=100):
     fake = Faker()
@@ -36,4 +36,23 @@ def posts(count=100):
             author=u
         )
         db.session.add(p)
+    db.session.commit()
+
+def comments(count=500):
+    fake = Faker()
+    user_count = User.query.count()
+    post_count = Post.query.count()
+    for i in range(count):
+        u = User.query.offset(randint(0, user_count - 1)).first()
+        p = Post.query.offset(randint(0, post_count - 1)).first()
+        t = fake.past_date()
+        while t < p.timestamp.date():
+            t = fake.past_date()
+        c = Comment(
+            body=fake.text(),
+            post=p,
+            author=u,
+            timestamp=t
+        )
+        db.session.add(c)
     db.session.commit()
