@@ -22,12 +22,7 @@
                 {% endif %}
             </div>
             {% if moderate %}
-                <br>
-                {% if comment.disabled %}
-                <a class="btn btn-default btn-xs" href="{{ url_for('.moderate_enable', id=comment.id, page=page) }}">Enable</a>
-                {% else %}
-                <a class="btn btn-danger btn-xs" href="{{ url_for('.moderate_disable', id=comment.id, page=page) }}">Disable</a>
-                {% endif %}
+                <a class="btn btn-{% if comment.disabled %}default{% else %}danger{% endif %} btn-xs" href="{{ url_for('.moderate_toggle', id=comment.id, page=page) }}">{% if comment.disabled %}Enable{% else %}Disable{% endif %}</a>
             {% endif %}
         </div>
     </li>
