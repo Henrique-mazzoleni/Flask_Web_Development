@@ -206,6 +206,10 @@ class User(UserMixin, db.Model):
             return False
         return self.followers.filter_by(follower_id=user.id).first() is not None
 
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'id': self.id}).decode('utf-8')
+    
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -217,6 +221,15 @@ class User(UserMixin, db.Model):
             user.follow(user)
             db.session.add(user)
             db.session.commit()
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except Exception:
+            return None
+        return User.query.get(data['id'])
 
 
 class AnonymousUser(AnonymousUserMixin):

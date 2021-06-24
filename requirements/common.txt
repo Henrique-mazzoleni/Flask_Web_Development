@@ -12,3 +12,4 @@ email-validator
 flask-pagedown
 markdown
 bleach
+flask-httpauth
