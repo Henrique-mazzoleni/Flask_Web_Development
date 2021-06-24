@@ -5,11 +5,6 @@ from wtforms.validators import DataRequired, Length, Email, Regexp
 
 from ..models import Role, User
 
-class NameForm(FlaskForm):
-    name = StringField('What is your name?', validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
-
 class EditProfileForm(FlaskForm):
     name = StringField('Real name', validators=[Length(0, 64)])
     location = StringField('Location', validators=[Length(0, 64)])
@@ -48,3 +43,6 @@ class PostForm(FlaskForm):
     submit = SubmitField('Submit')
     
 
+class CommentForm(FlaskForm):
+    body = StringField('', validators=[DataRequired()])
+    submit = SubmitField('Submit')
