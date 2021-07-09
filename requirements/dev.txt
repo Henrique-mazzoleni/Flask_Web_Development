@@ -1,3 +1,4 @@
 -r common.txt
 faker
 httpie
+coverage
