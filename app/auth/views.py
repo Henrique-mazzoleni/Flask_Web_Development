@@ -6,7 +6,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from . import auth
 from ..models import User
 from ..email import send_email
-from .froms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm, ResetPassForm, ChangeEmailForm
+from .forms import LoginForm, RegistrationForm, ChangePassForm, ForgotenPassForm, ResetPassForm, ChangeEmailForm
 from .. import db
 
 
