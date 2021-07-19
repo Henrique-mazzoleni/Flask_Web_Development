@@ -156,9 +156,9 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_confirmation_token(self, expiration=3600, email=None):
+    def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id, 'email': email}).decode('utf-8')
+        return s.dumps({'confirm': self.id, 'email': self.email}).decode('utf-8')
 
     def check_token(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])

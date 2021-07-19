@@ -1,3 +1,4 @@
+from logging import shutdown
 from flask import render_template, request, redirect, url_for, flash, current_app, abort
 from flask.helpers import make_response
 from flask_login import login_required, current_user
@@ -218,3 +219,13 @@ def moderate_toggle(id):
     db.session.add(comment)
     db.session.commit()
     return redirect(url_for('.moderate', page=request.args.get('page', 1, type=int)))
+
+@main.route('/shutdown')
+def server_shutdown():
+    if not current_app.testing:
+        abort(404)
+    shutdown = request.environ.get('werkzeug.server.shutdown')
+    if not shutdown:
+        abort(500)
+    shutdown()
+    return 'Shuttinng down...'
