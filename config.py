@@ -20,6 +20,8 @@ class Config:
 
     # General Database Manager Config
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_RECORD_QUERIES = True
+    FLASKY_SLOW_DB_QUERY_TIME = 0.5
 
     # Pagination config
     FLASKY_USERS_PER_PAGE = 10
