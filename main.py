@@ -65,11 +65,11 @@ def profile(length, profile_dir):
                                       profile_dir=profile_dir)
     app.run(debug=False)
 
-@manager.command
+@app.cli.command()
 def deploy():
     """Run deployment tasks."""
     # migrate database to latest revision
-    uprade()
+    upgrade()
 
     # crate or update user roles
     Role.insert_roles()
