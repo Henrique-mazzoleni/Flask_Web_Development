@@ -12,6 +12,9 @@ from flask_migrate import Migrate
 from app import create_app, db
 from app.models import User, Follow, Role, Permission, Post, Comment
 
+from flask_migrate import upgrade
+from app.models import Role, User
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
 
@@ -61,6 +64,18 @@ def profile(length, profile_dir):
     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length],
                                       profile_dir=profile_dir)
     app.run(debug=False)
+
+@manager.command
+def deploy():
+    """Run deployment tasks."""
+    # migrate database to latest revision
+    uprade()
+
+    # crate or update user roles
+    Role.insert_roles()
+
+    # ensure all users are following themselves
+    User.add_self_follows()
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', port=5000)
