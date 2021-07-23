@@ -86,7 +86,7 @@ class HerokuConfig(ProductionConfig):
 
     @classmethod
     def init_app(cls, app):
-        ProductionConfig.init_app(app))
+        ProductionConfig.init_app(app)
 
         # log to stderr
         import logging
@@ -104,5 +104,6 @@ config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
-    'default': DevelopmentConfig
+    'default': DevelopmentConfig,
+    'heroku': HerokuConfig
 }
